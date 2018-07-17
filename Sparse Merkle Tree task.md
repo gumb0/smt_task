@@ -19,7 +19,7 @@ It is valuable to pre-compute a set of default hashes for all `q` levels:
 In a sparse tree almost all level 1 nodes have the value `H(0 || 0)`, almost all level 2 nodes have the value `H(H(0 || 0)|| H(0 || 0))`, and so on. Only nodes that lead to a non-zero leaf value actually need to be computed individually - the rest have the same value and we can compute them efficiently.
 
 Here's an illustration of the simplified SMT storing 4-bit values. Here to store the keys `5` and `C` we only need to compute the hashes corresponding to white circles, all grey circles are default hashes and should not be duplicated in the storage.
-![Sparse Merkle Tree](https://gist.githubusercontent.com/gumb0/5177820c96689a0301149a9e0b47b235/raw/fdccfc3a812cc0046d8e423e7dcdca798f01016c/SMT.jpg)
+![Sparse Merkle Tree](assets/SMT.jpg)
 
 ## Sparse Merkle proofs
 
