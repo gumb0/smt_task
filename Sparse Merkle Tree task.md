@@ -33,8 +33,8 @@ Instead, it has a format `(proofBits, proofBytes)`, where  `proofBits`  is `q` b
 And `proofBytes` contains just the non-default hashes. If we don't store any special values in the tree associated with each key (that is, we want to represent a "set" of values, similar to `std::set`), it is natural to keep at the leaves of the tree the values 0 and 1.
 
 Examples
-- The proof of `5` existence in the tree illustrated below is: `(0b00011, H1, Hroot)`
-- The proof of `6` non-existence: `(0b01011, H2, H1, Hroot)`
+- The proof of `5` existence in the tree illustrated below is: `(0b0001, H1, Hroot)`
+- The proof of `6` non-existence: `(0b0101, H2, H1, Hroot)`
 
 
 ## The task
