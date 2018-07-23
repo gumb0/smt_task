@@ -1,10 +1,12 @@
 This assumes prior knowledge of [Merkle Trees](https://en.wikipedia.org/wiki/Merkle_tree) and Merkle proofs.
 
+See [Merkle Tree &amp; Merkle Root Explained](https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/) and [Merkle Trees - Efficient Data Verification](https://www.youtube.com/watch?v=fpAxfVWXjds) for succinct introduction.
+
 ## Intro to Sparse Merkle Trees
 
 A sparse Merkle tree (SMT) is a Merkle tree that contains a leaf for every possible output of a hash function. In other words, an SMT has 2^N leaves for a hash function with a N-bit output, so for example when using SHA-256 this means 2^256 leaves. Each level (nodes of the same height) of the tree corresponds to the bit of the hash value, going down the tree corresponds to going from the most significant bit to the least significant bit, choosing left or right child depending on the bit value.
 
-Since the full in-memory representation of an SMT is impractical (to say the least) we have to simulate it, and it turns out that simulation is practical. This is because the tree is sparse: most leaves are empty, so when we calculate the hash of the empty leaves we get the same hash. The same is true for interior nodes whose children are all empty, and so on.
+Since the full in-memory representation of an SMT is impractical (to say the least), we have to simulate it, and it turns out that simulation is practical. This is because the tree is sparse: most leaves are empty, so when we calculate the hash of the empty leaves we get the same hash. The same is true for interior nodes whose children are all empty, and so on.
 
 
 This means that only the hashes for the `n` Merkle branches need to be computed, where `n` is the number of keys stored in the tree.
