@@ -18,7 +18,7 @@ It is valuable to pre-compute a set of default hashes for all `q` levels:
 - At level 2, the default hash is `H(H(H(0)|| H(0)) || H(H(0) || H(0)))`
 ... and so on
 
-In a sparse tree almost all level 1 nodes have the value `H(0 || 0)`, almost all level 2 nodes have the value `H(H(0 || 0)|| H(0 || 0))`, and so on. Only nodes that lead to a non-zero leaf value actually need to be computed individually - the rest have the same value and we can compute them efficiently.
+In a sparse tree almost all level 1 nodes have the value `H(0 || 0)`, almost all level 2 nodes have the value `H(H(0 || 0)|| H(0 || 0))`, and so on. Only the nodes that lead to a non-zero leaf value actually need to be computed individually - the rest have the same value and we can compute them efficiently.
 
 Here's an illustration of the simplified SMT storing 4-bit values. Here to store the keys `5` and `C` we only need to compute the hashes corresponding to white circles, all grey circles are default hashes and should not be duplicated in the storage.
 ![Sparse Merkle Tree](assets/SMT.jpg)
@@ -27,13 +27,16 @@ Here's an illustration of the simplified SMT storing 4-bit values. Here to store
 
 Unlike a proof in a usual Merkle tree, proofs in SMT are NOT `q` N-bit hashes going all the way from level 0 at the leaf all the way to the root! 
 
-Instead, it has a format `(proofBits, proofBytes)`, where  `proofBits`  is `q` bits that can compactly represent whether the sisters going up to the root are default hashes or not – that is, for each bit:
+Instead, a proof has a format `(proofBits, array_of_hashes)`, where  `proofBits`  is `q` bits that can compactly represent whether the sisters going up to the root are default hashes or not – that is, for each bit:
 
 - 0 means "use the default hash"
-- 1 means "use 32 bytes in `proofBytes`"
+- 1 means "use the hash from `array_of_hashes`"
 
-And `proofBytes` contains just the non-default hashes. If we don't store any special values in the tree associated with each key (that is, we want to represent a "set" of values, similar to `std::set`), it is natural to keep at the leaves of the tree the values 0 and 1.
+And `array_of_hashes` contains just the non-default hashes. If we don't store any special values in the tree associated with each key (that is, we want to represent a "set" of values, similar to `std::set`), it is natural to keep at the leaves of the tree the values 0 and 1.
 
-Examples
-- The proof of `5` existence in the tree illustrated below is: `(0b0001, H1, Hroot)`
-- The proof of `6` non-existence: `(0b0101, H2, H1, Hroot)`
+#### Examples
+
+For the tree illustrated above:
+
+- The proof of existence of the key `5` : `(0b0001, H1, Hroot)`
+- The proof of non-existence of the key `6` : `(0b0101, H2, H1, Hroot)`
