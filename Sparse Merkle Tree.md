@@ -40,5 +40,11 @@ And `array_of_hashes` contains just the non-default hashes. The last element is 
 
 For the tree illustrated above:
 
-- The proof of existence of the key `5` : `(0b0001, H1, Hroot)`
-- The proof of non-existence of the key `6` : `(0b0101, H2, H1, Hroot)`
+- `default_hash0 = H(0)`
+- `default_hash1 = H(default_hash0 || default_hash0)`
+- `default_hash2 = H(default_hash1 || default_hash1)`
+- `H2 = H(default_hash0 || H(1))`
+- `H1 = H(default_hash2 || H(H2 || default_hash1))`
+- The proof of existence of the key `5` : `(0b0001, H3, Hroot)`
+- The proof of existence of the key `C` : `(0b0001, H1, Hroot)`
+- The proof of non-existence of the key `6` : `(0b0101, H2, H3, Hroot)`
