@@ -29,9 +29,9 @@ size_t hash(uint64_t h1, uint64_t h2)
 
 Your implementation can use standard map container (`std::map` or `std::unordered_map`) to represent the internal storage of tree nodes, i.e. storing `hash => node`pairs. 
 
-Create a program that reads a file from the path given as a command-line argument, each line of a file is a hexadecimal string representing 32 bytes of the key to store in the tree.
+Create a program that reads a file from the path given as a command-line argument, each line of a file is an unsigned 64-bit integer to store in the tree.
 
-After populating a tree with keys from the file, the program should get input from standard input, interpret each line as a key to lookup and output to standard output the line of the following format:
+After populating a tree with keys from the file, the program should get a value input from standard input, interpret each line as an integer key to lookup and output to standard output the line of the following format:
 
 ```
 0|1 proofBits hash1 hash2 ... hashN
