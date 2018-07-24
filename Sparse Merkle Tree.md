@@ -32,8 +32,6 @@ the same.
 This means that only the hashes for the `k` Merkle branches need to be computed,
 where `k` is the number of keys (TODO: should the key be explained?) stored in the tree.
 
-If we don't store any special values in the tree associated with each key (that is, we want to represent a "set" of values, similar to `std::set`), it is natural to keep at the leaves of the tree the values 0 and 1.
-
 ### Default hashes
 
 It is valuable to pre-compute a set of _default hashes_ for all `h` levels:
