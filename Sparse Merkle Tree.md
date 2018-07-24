@@ -2,45 +2,91 @@ This assumes prior knowledge of [Merkle Trees](https://en.wikipedia.org/wiki/Mer
 
 See [Merkle Tree &amp; Merkle Root Explained](https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/) and [Merkle Trees - Efficient Data Verification](https://www.youtube.com/watch?v=fpAxfVWXjds) for succinct introduction.
 
-## Intro to Sparse Merkle Trees
+## Sparse Merkle Trees
 
-A sparse Merkle tree (SMT) is a Merkle tree that contains a leaf for every possible output of a hash function. In other words, an SMT has 2^N leaves for a hash function with a N-bit output, so for example when using SHA-256 this means 2^256 leaves. Each level (nodes of the same height) of the tree corresponds to the bit of the hash value, going down the tree corresponds to going from the most significant bit to the least significant bit, choosing left or right child depending on the bit value.
+### Introduction
 
-Since the full in-memory representation of an SMT is impractical (to say the least), we have to simulate it, and it turns out that simulation is practical. This is because the tree is sparse: most leaves are empty, so when we calculate the hash of the empty leaves we get the same hash. The same is true for interior nodes whose children are all empty, and so on.
+A Sparse Merkle Tree (SMT) is a [full binary] Merkle tree that contains a _leaf_ 
+for every possible output of a hash function.
+For a hash function with N-bit output the SMT:
+ - height: _h = N_,
+ - number of leaves: _l = 2<sup>N</sup>_,
+ - number of all nodes: _n = 2<sup>N + 1</sup> - 1_.
+ 
+For example when using any 256-bit hash function the corresponding SMT has
+2<sup>256</sup> leaves.
+
+(TODO: The following paragraph must be improved)
+Each tree level (nodes of the same height) corresponds to the bit of the hash 
+value, going down the tree corresponds to going from the most significant bit 
+to the least significant bit, choosing left or right child depending on the bit 
+value.
 
 
-This means that only the hashes for the `n` Merkle branches need to be computed, where `n` is the number of keys stored in the tree.
+### Implementation
+
+Since the full in-memory representation of an SMT is impractical 
+(to say the least), we have to simulate it. 
+The simulation is practical because the tree is sparse: most leaves are empty
+and the hashes of empty leaves are the same. 
+Similarly, the hashes of _internal_ nodes whose children are all empty are 
+the same.
+
+This means that only the hashes for the `k` Merkle branches need to be computed,
+where `k` is the number of keys (TODO: should the key be explained?) stored in the tree.
 
 If we don't store any special values in the tree associated with each key (that is, we want to represent a "set" of values, similar to `std::set`), it is natural to keep at the leaves of the tree the values 0 and 1.
 
-It is valuable to pre-compute a set of default hashes for all `q` levels:
+### Default hashes
 
-- At level 0, the default hash is `H(0)`
-- At level 1, the default hash is `H(H(0) || H(0))`
-- At level 2, the default hash is `H(H(H(0)|| H(0)) || H(H(0) || H(0)))`
-... and so on
+It is valuable to pre-compute a set of _default hashes_ for all `h` levels:
 
-In a sparse tree almost all level 0 nodes have the value `H(0)`, almost all level 1 nodes have the value `H(H(0) || H(0))`, almost all level 2 nodes have the value `H(H(H(0) || H(0)) || H(H(0) || H(0)))`, and so on. Only the nodes that lead to a non-zero leaf value actually need to be computed individually - the rest have the same value and we can compute them efficiently.
+- At level 0, the default hash is `H("")`
+- At level 1, the default hash is `H(H("") || H(""))`
+- At level 2, the default hash is `H(H(H("") || H("")) || H(H("") || H("")))`
+... and so on,
+where `H` is the hash function returning the result hash as an array of bytes, 
+`""` is 0-length array of bytes and `||` represents bytes concatenation.
 
-Here's an illustration of the simplified SMT storing 4-bit values. Here to store the keys `5` and `C` we only need to compute the hashes corresponding to white circles, all grey circles are default hashes and should not be duplicated in the storage.
-![Sparse Merkle Tree](assets/SMT.jpg)
+(TODO: Should we numerate the default hashes as D0, D1, etc?)
 
-## Sparse Merkle proofs
+In a sparse tree almost all leaves (level 0 nodes) have the value `H("")`, 
+almost all level 1 nodes have the value `H(H("") || H(""))`, 
+almost all level 2 nodes have the value `H(H(H("") || H("")) || H(H("") || H("")))`,
+and so on. Only the nodes that lead to a non-zero leaf value actually need to be 
+computed individually - the rest have the same value and we can compute them 
+efficiently.
 
-Unlike a proof in a usual Merkle tree, proofs in SMT are NOT `q` N-bit hashes going all the way from level 0 at the leaf all the way to the root! 
+### Example 1
 
-Instead, a proof has a format `(proofBits, array_of_hashes)`, where  `proofBits`  is `q` bits that can compactly represent whether the sisters going up to the root are default hashes or not – that is, for each bit:
+Here's an illustration of the simplified SMT storing 4-bit values. 
+Here to store the keys `5` and `C` we only need to compute the hashes 
+corresponding to white circles, all grey circles are default hashes and 
+should not be duplicated in the storage.
+![Sparse Merkle Tree example image]
 
-- 0 means "use the default hash"
-- 1 means "use the hash from `array_of_hashes`"
+## Sparse Merkle Proofs
 
-And `array_of_hashes` contains just the non-default hashes. The last element is always a root hash.
+Unlike a proof in the usual Merkle Tree, proofs in SMT are **not** `h` N-bit 
+hashes going all the way from level 0 at the leaf all the way to the root! 
 
-#### Examples
+Instead, a proof has a format `(proof_bits, array_of_hashes)`, 
+where  `proof_bits`  is `h` bits that can compactly represent whether the sisters (TODO: what?)
+going up to the root are default hashes or not – that is, for each bit:
+
+- 0 means "use the default hash of corresponding level"
+- 1 means "use the corresponding hash from the `array_of_hashes`"
+
+(TODO: The above can be improved by introducing the notion of _i-th_ bit in `proof_bits`).
+
+The `array_of_hashes` contains just the non-default hashes. The last element in 
+the array is always the tree root hash.
+
+### Example 2
 
 For the tree illustrated above:
 
-- `default_hash0 = H(0)`
+- `default_hash0 = H("")`
 - `default_hash1 = H(default_hash0 || default_hash0)`
 - `default_hash2 = H(default_hash1 || default_hash1)`
 - `H2 = H(default_hash0 || H(1))`
@@ -48,3 +94,7 @@ For the tree illustrated above:
 - The proof of existence of the key `5` : `(0b0001, H3, Hroot)`
 - The proof of existence of the key `C` : `(0b0001, H1, Hroot)`
 - The proof of non-existence of the key `6` : `(0b0101, H2, H3, Hroot)`
+
+
+[full binary]: https://wikipedia.org/wiki/Binary_tree
+[Sparse Merkle Tree example image]: assets/SMT.jpg
