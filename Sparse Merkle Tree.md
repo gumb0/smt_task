@@ -30,25 +30,24 @@ Similarly, the hashes of _internal_ nodes whose children are all empty are
 the same.
 
 This means that only the hashes for the `k` Merkle branches need to be computed,
-where `k` is the number of keys (TODO: should the key be explained?) stored in the tree.
+where `k` is the number of keys stored in the tree.
 
 ### Default hashes
 
 It is valuable to pre-compute a set of _default hashes_ for all `h` levels:
 
-- At level 0, the default hash is `H("")`
-- At level 1, the default hash is `H(H("") || H(""))`
-- At level 2, the default hash is `H(H(H("") || H("")) || H(H("") || H("")))`
+- at level 0, the default hash is `D0 = H("")`,
+- at level 1, the default hash is `D1 = H(D0 || D0)`,
+- at level 2, the default hash is `D2 = H(D1 || D1)`
+
 ... and so on,
 where `H` is the hash function returning the result hash as an array of bytes, 
 `""` is 0-length array of bytes and `||` represents bytes concatenation.
 
-(TODO: Should we numerate the default hashes as D0, D1, etc?)
-
-In a sparse tree almost all leaves (level 0 nodes) have the value `H("")`, 
-almost all level 1 nodes have the value `H(H("") || H(""))`, 
-almost all level 2 nodes have the value `H(H(H("") || H("")) || H(H("") || H("")))`,
-and so on. Only the nodes that lead to a non-zero leaf value actually need to be 
+In a sparse tree almost all leaves (level 0 nodes) have the value `D0`, 
+almost all level 1 nodes have the value `D1`, 
+almost all level 2 nodes have the value `D2`, and so on.
+Only the nodes that lead to a non-zero leaf value actually need to be 
 computed individually - the rest have the same value and we can compute them 
 efficiently.
 
@@ -66,26 +65,21 @@ Unlike a proof in the usual Merkle Tree, proofs in SMT are **not** `h` N-bit
 hashes going all the way from level 0 at the leaf all the way to the root! 
 
 Instead, a proof has a format `(proof_bits, array_of_hashes)`, 
-where  `proof_bits`  is `h` bits that can compactly represent whether the sisters (TODO: what?)
-going up to the root are default hashes or not – that is, for each bit:
+where  `proof_bits`  is `h` bits that can compactly represent whether the hashes
+going up to the root are default hashes or not – that is, for _i-th_ bit:
 
-- 0 means "use the default hash of corresponding level"
+- 0 means "use the default hash of level _i_"
 - 1 means "use the corresponding hash from the `array_of_hashes`"
 
-(TODO: The above can be improved by introducing the notion of _i-th_ bit in `proof_bits`).
-
-The `array_of_hashes` contains just the non-default hashes. The last element in 
-the array is always the tree root hash.
+The `array_of_hashes` contains just the non-default hashes in order of tree levels.
+The last element in the array is always the tree root hash.
 
 ### Example 2
 
 For the tree illustrated above:
 
-- `default_hash0 = H("")`
-- `default_hash1 = H(default_hash0 || default_hash0)`
-- `default_hash2 = H(default_hash1 || default_hash1)`
-- `H2 = H(default_hash0 || H(1))`
-- `H1 = H(default_hash2 || H(H2 || default_hash1))`
+- `H2 = H(D0 || H("5"))`
+- `H1 = H(D2 || H(H2 || D1))`
 - The proof of existence of the key `5` : `(0b0001, H3, Hroot)`
 - The proof of existence of the key `C` : `(0b0001, H1, Hroot)`
 - The proof of non-existence of the key `6` : `(0b0101, H2, H3, Hroot)`
