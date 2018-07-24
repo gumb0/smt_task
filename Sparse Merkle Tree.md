@@ -14,7 +14,7 @@ For a hash function with N-bit output the SMT:
  - number of all nodes: _n = 2<sup>N + 1</sup> - 1_.
  
 For example when using any 256-bit hash function the corresponding SMT has
-2^256 leaves.
+2<sup>256</sup> leaves.
 
 (TODO: The following paragraph must be improved)
 Each tree level (nodes of the same height) corresponds to the bit of the hash 
@@ -29,7 +29,7 @@ Since the full in-memory representation of an SMT is impractical
 (to say the least), we have to simulate it. 
 The simulation is practical because the tree is sparse: most leaves are empty
 and the hashes of empty leaves are the same. 
-Similarly, the hashes of _internal_ nodes whose all children are empty are 
+Similarly, the hashes of _internal_ nodes whose children are all empty are 
 the same.
 
 This means that only the hashes for the `k` Merkle branches need to be computed,
@@ -67,7 +67,7 @@ should not be duplicated in the storage.
 
 ## Sparse Merkle Proofs
 
-Unlike a proof in an usual Merkle Tree, proofs in SMT are **not** `h` N-bit 
+Unlike a proof in the usual Merkle Tree, proofs in SMT are **not** `h` N-bit 
 hashes going all the way from level 0 at the leaf all the way to the root! 
 
 Instead, a proof has a format `(proof_bits, array_of_hashes)`, 
