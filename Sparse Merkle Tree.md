@@ -12,15 +12,12 @@ For a hash function with N-bit output the SMT:
  - height: _h = N_,
  - number of leaves: _l = 2<sup>N</sup>_,
  - number of all nodes: _n = 2<sup>N + 1</sup> - 1_.
- 
+
 For example when using any 256-bit hash function the corresponding SMT has
 2<sup>256</sup> leaves.
 
-(TODO: The following paragraph must be improved)
-Each tree level (nodes of the same height) corresponds to the bit of the hash 
-value, going down the tree corresponds to going from the most significant bit 
-to the least significant bit, choosing left or right child depending on the bit 
-value.
+Inserting or looking up a key in the tree involves going down the branch of the tree from the root to the leaf, while at the same time iterating the bits of the key from the most significant bit 
+to the least significant bit. Each bit of the key determines whether we go down to the left or to the right child.
 
 
 ### Implementation
